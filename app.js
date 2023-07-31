@@ -30,17 +30,30 @@ const mapContents = fs.readFileSync(path.join(mapDir, mapFileName), 'utf8');
 const re = /libuser\.a\((.*)\.o\)/;
 
 let files = {};
+let inMappedSection = false;
+
+// Archive member included to satisfy reference by file (symbol)
+// Discarded input sections
+// Memory Configuration
+// Linker script and memory map
 
 for(const line of mapContents.split(/\n/)) {
-    const m = line.match(re);
-    if (m) {
-        const f = m[1];
-        if (!files[f]) {
-            files[f] = true;
+    if (line.startsWith('Linker script and memory map')) {
+        inMappedSection = true;
+    }
+
+    if (inMappedSection) {
+        const m = line.match(re);
+        if (m) {
+            const f = m[1];
+            if (!files[f]) {
+                files[f] = true;
+            }    
         }
     }
 }
-console.log('files', files);
+// These are the input files that are mapped into memory by the linker (base name only, no path, no extension)
+// console.log('files', files);
 
 let removeFiles = [];
 let hasFiles = {};
@@ -83,28 +96,16 @@ function processDir(d) {
 
 processDir(srcDir);
 
-console.log('hasFiles', hasFiles);
+// These are all of the directory paths and the count of the number of mapped object files in it
+// 0 = everything was stripped and entire directory can be deleted
+// console.log('hasFiles', hasFiles);
 
 let removeDirs = [];
 
-const exceptionDirs = [
-//     'edge-impulse-sdk/porting/particle',
-];
-
-
 for(const key in hasFiles) {
     if (hasFiles[key] === 0) {
-        let isException = false;
-        for(const f of exceptionDirs) {
-            if (key.includes(f)) {
-                isException = true;
-            }
-        }
-
-        if (!isException) {
-            console.log('remove dir ' + key);
-            removeDirs.push(key);    
-        }
+        console.log('remove dir ' + key);
+        removeDirs.push(key);    
     }
 }
 
