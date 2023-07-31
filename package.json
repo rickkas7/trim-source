@@ -1,0 +1,22 @@
+{
+  "name": "trim-source",
+  "version": "0.0.1",
+  "description": "Tool for removing unnecessary .cpp source files from a Particle build",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rickkas7/trim-source.git"
+  },
+  "author": "rickkas7@rickkas7.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rickkas7/trim-source/issues"
+  },
+  "homepage": "https://github.com/rickkas7/trim-source#readme",
+  "dependencies": {
+    "yargs": "^17.7.2"
+  }
+}
