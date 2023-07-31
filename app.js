@@ -4,8 +4,11 @@ const path = require('path');
 const { hideBin } = require('yargs/helpers');
 const argv = require('yargs/yargs')(hideBin(process.argv)).argv;
 
-const rootDir = '/Users/rickk/Documents/src/TestEI/You_re_Muted__inferencing_v10';
+//const rootDir = '/Users/rickk/Documents/src/TestEI/You_re_Muted__inferencing';
+const rootDir = '/Users/rickk/Documents/src/TestEI/Doorbell_Chimes_inferencing';
 let mapDir = 'target/5.4.1/p2';
+
+const dryRun = argv.dryRun;
 
 if (!mapDir.startsWith('/')) {
     mapDir = path.join(rootDir, mapDir);
@@ -100,15 +103,30 @@ processDir(srcDir);
 // 0 = everything was stripped and entire directory can be deleted
 // console.log('hasFiles', hasFiles);
 
+const exceptionDirs = [
+    'edge-impulse-sdk/dsp', // Has .hpp files that are used elsewhere!
+    'edge-impulse-sdk/tensorflow/lite/core/api',
+];
+
 let removeDirs = [];
 
 for(const key in hasFiles) {
     if (hasFiles[key] === 0) {
-        console.log('remove dir ' + key);
-        removeDirs.push(key);    
+        let isException = false;
+        for(const f of exceptionDirs) {
+            if (key.includes(f)) {
+                isException = true;
+                break;
+            }
+        }
+        if (!isException) {
+            console.log('remove dir ' + key);
+            removeDirs.push(key);        
+        }
     }
 }
 
+// Filter the files to remove list so if the directory has been removed, it won't attempt to remove each file
 let removeFilesFiltered = [];
 for(const f of removeFiles) {
     let parentDirRemoved = false;
@@ -121,6 +139,26 @@ for(const f of removeFiles) {
     if (!parentDirRemoved) {
         removeFilesFiltered.push(f);
         console.log('remove file ' + f);
+    }
+}
+
+if (!dryRun) {
+    for(const f of removeDirs) {
+        try {
+            fs.rmSync(f, {recursive:true});
+        }
+        catch(e) {
+            console.log('exception removing directory ' + f, e);
+        }
+    }
+
+    for(const f of removeFilesFiltered) {
+        try {
+            fs.rmSync(f, {});
+        }
+        catch(e) {
+            console.log('exception removing file ' + f, e);
+        }
     }
 }
 
