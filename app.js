@@ -4,9 +4,8 @@ const path = require('path');
 const { hideBin } = require('yargs/helpers');
 const argv = require('yargs/yargs')(hideBin(process.argv)).argv;
 
-//const rootDir = '/Users/rickk/Documents/src/TestEI/You_re_Muted__inferencing';
-const rootDir = '/Users/rickk/Documents/src/TestEI/Doorbell_Chimes_inferencing';
-let mapDir = 'target/5.4.1/p2';
+const rootDir = argv.root;
+let mapDir = argv.map || 'target/5.4.1/p2';
 
 const dryRun = argv.dryRun;
 
